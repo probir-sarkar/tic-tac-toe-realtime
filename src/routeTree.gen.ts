@@ -8,9 +8,15 @@ import { Route as rootRoute } from './routes/__root'
 
 // Create Virtual Routes
 
+const MultiplayerLazyImport = createFileRoute('/multiplayer')()
 const IndexLazyImport = createFileRoute('/')()
 
 // Create/Update Routes
+
+const MultiplayerLazyRoute = MultiplayerLazyImport.update({
+  path: '/multiplayer',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/multiplayer.lazy').then((d) => d.Route))
 
 const IndexLazyRoute = IndexLazyImport.update({
   path: '/',
@@ -25,9 +31,16 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/multiplayer': {
+      preLoaderRoute: typeof MultiplayerLazyImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
 // Create and export the route tree
 
-export const routeTree = rootRoute.addChildren([IndexLazyRoute])
+export const routeTree = rootRoute.addChildren([
+  IndexLazyRoute,
+  MultiplayerLazyRoute,
+])
